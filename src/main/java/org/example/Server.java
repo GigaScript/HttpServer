@@ -2,7 +2,6 @@ package org.example;
 
 import java.io.*;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,6 +32,6 @@ public class Server {
 
 
     private static List<String> getValidPaths() {
-        return List.of("/index.html", "/spring.svg", "/spring.png", "/resources.html", "/styles.css", "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
+        return List.of("/index.html", "/spring.svg", "/media/spring.png", "/resources.html", "/resources/css/styles.css", "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
     }
 }

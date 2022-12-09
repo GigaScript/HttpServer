@@ -5,11 +5,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class Connection implements Runnable {
-
+    String publicDir = "./public";
     Socket socket = null;
     BufferedReader inputStream = null;
     BufferedOutputStream outputStream = null;
@@ -28,17 +29,6 @@ public class Connection implements Runnable {
 
     }
 
-    private void closeStream() throws IOException {
-        if (inputStream != null) {
-            inputStream.close();
-        }
-        if (outputStream != null) {
-            outputStream.close();
-        }
-        if (socket != null) {
-            socket.close();
-        }
-    }
 
     private static Socket waitConnect(ServerSocket serverSocket) throws IOException {
         return serverSocket.accept();
@@ -66,15 +56,16 @@ public class Connection implements Runnable {
             checkCorrectnessRequest(requestParts);
             final var path = requestParts[1];
             if (isValidPath(path)) {
+                System.out.println(path);
                 addAnswer(Headers.getNotFound());
                 sentAnswer();
                 socket.close();
             }
-            final var filePath = Path.of(".", "public", path);
+            final Path filePath = parseFilePath(path);
             final var mimeType = Files.probeContentType(filePath);
 
             if (path.equals("/classic.html")) {
-                byte[] changedClassicPage = changeClassicPage(filePath, mimeType);
+                byte[] changedClassicPage = changeClassicPage(filePath);
                 addAnswer(
                         Headers.getOk(
                                 mimeType
@@ -97,8 +88,18 @@ public class Connection implements Runnable {
         }
     }
 
+    private Path parseFilePath(String path) {
+        if (path.contains("?")) {
+            String[] urlWhitQuery = path.split("\\?");
+            path = urlWhitQuery[0];
 
-    private byte[] changeClassicPage(Path filePath, String mimeType) throws IOException {
+        }
+        System.out.println(publicDir + path);
+        return Paths.get(publicDir + path);
+    }
+
+
+    private byte[] changeClassicPage(Path filePath) throws IOException {
         final var template = Files.readString(filePath);
         return template.replace(
                 "{time}",
@@ -115,6 +116,11 @@ public class Connection implements Runnable {
     }
 
     private boolean isValidPath(String path) {
+        if (path.contains("?")) {
+            String[] urlWhitQuery = path.split("\\?");
+            path = urlWhitQuery[0];
+
+        }
         return !validPaths.contains(path);
     }
 
