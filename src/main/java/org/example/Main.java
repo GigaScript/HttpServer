@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.handlers.ClassicPageHandler;
 import org.example.handlers.DefaultHandler;
+import org.example.handlers.FormsPageHandler;
 import org.example.handlers.NotFoundHandler;
 
 public class Main {

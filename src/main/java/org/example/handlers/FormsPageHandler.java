@@ -1,5 +1,6 @@
-package org.example;
+package org.example.handlers;
 
+import org.example.Request;
 import org.example.handlers.DefaultHandler;
 import org.example.handlers.Handler;
 
