@@ -60,6 +60,8 @@ public class Server {
 
     public synchronized Handler getHandler(Request request) {
         Path path = request.getPath();
+        request.getQueryParam("name");
+        request.getQueryParam("value");
         if (isValidPath(path)) {
             return handlers.get("HANDLER").get("NOTFOUND");
         }
@@ -72,6 +74,7 @@ public class Server {
         } else {
             handler = handlers.get("HANDLER").get("DEFAULT");
         }
+        System.out.println(request);
         return handler;
     }
 }

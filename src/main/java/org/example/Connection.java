@@ -5,6 +5,7 @@ import org.example.handlers.Handler;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URISyntaxException;
 
 public class Connection implements Runnable {
     Socket socket = null;
@@ -52,7 +53,7 @@ public class Connection implements Runnable {
             handler.handle(request, outputStream);
             sentAnswer();
             socket.close();
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
