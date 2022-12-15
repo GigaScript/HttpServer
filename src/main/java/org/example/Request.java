@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class Request {
+    private final List<String> headers;
     String publicDir = "./public";
     private final String method;
     private final Path path;
@@ -17,15 +18,15 @@ public class Request {
     private final String body;
     private final List<NameValuePair> queryParams;
 
-    public Request(String requestLine) throws IOException, URISyntaxException {
-        String[] request = requestLine.split(" ");
-        checkCorrectnessRequest(request);
-        this.method = request[0];
-        this.builder = new URIBuilder(request[1]);
+
+    public Request(String method, String fullPath, List<String> headers, String body) throws URISyntaxException {
+        this.method = method;
+        this.builder = new URIBuilder(fullPath);
         this.path = Path.of(publicDir + builder.getPath());
         this.fileName = path.getFileName().toString();
         this.queryParams = builder.getQueryParams();
-        this.body = request[2];
+        this.headers = headers;
+        this.body = body;
     }
 
 
@@ -35,7 +36,7 @@ public class Request {
 
     public NameValuePair getQueryParam(String name) {
         if (queryParams.isEmpty()) {
-            System.err.print("[Запрошен QueryParam = " + name + "] QueryParam пуст \n\n");
+            System.err.print("[Запрошен QueryParam = " + name + "] QueryParam пуст \r\n");
             return null;
         }
         NameValuePair nameValuePair = builder.getFirstQueryParam(name);
@@ -43,7 +44,7 @@ public class Request {
         if (nameValuePair != null) {
             System.out.print("[Запрошен QueryParam = " + name + "] Param value = " + nameValuePair.getValue() + "\r\n");
         } else {
-            System.err.print("[Запрошен QueryParam = " + name + "] QueryParam не найден \n\n");
+            System.err.print("[Запрошен QueryParam = " + name + "] QueryParam не найден \r\n");
         }
         return nameValuePair;
     }
@@ -62,19 +63,14 @@ public class Request {
         return body;
     }
 
-    private void checkCorrectnessRequest(String[] requestParts) {
-        if (requestParts.length != 3) {
-            throw new RuntimeException("Объект Request не корректный");
-        }
-    }
-
     @Override
     public String toString() {
-        return "Request{" +
+        return "[Request{" +
                 "method='" + method + '\'' +
                 ", path='" + path.toString() + '\'' +
-                ", body='" + body + '\'' +
-                ", queryParams=" + queryParams +
-                '}';
+                ", \n headers='" + headers + '\'' +
+                ", \n body='" + body + '\'' +
+                ", queryParams=" + getQueryParams() +
+                "}]";
     }
 }

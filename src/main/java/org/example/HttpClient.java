@@ -29,6 +29,7 @@ package org.example;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -77,6 +78,14 @@ public class HttpClient {
                 // do something useful with the response body
                 // and ensure it is fully consumed
                 EntityUtils.consume(entity2);
+            }
+            HttpPut httpPut  = new HttpPut("http://127.0.0.1:9999/forms.html");
+            try (CloseableHttpResponse response3 = httpclient.execute(httpPut)) {
+                System.out.println(response3.getCode() + " " + response3.getReasonPhrase());
+                HttpEntity entity3 = response3.getEntity();
+                // do something useful with the response body
+                // and ensure it is fully consumed
+                EntityUtils.consume(entity3);
             }
         }
     }
