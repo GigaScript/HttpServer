@@ -5,6 +5,7 @@ import org.example.handlers.Handler;
 import java.io.*;
 import java.net.ServerSocket;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -15,11 +16,16 @@ public class Server {
     private final ExecutorService threadPool = Executors.newFixedThreadPool(maxThread);
     private int serverPort;
     private final Map<String, Map<String, Handler>> handlers = new ConcurrentHashMap<>();
+    public static final String GET = "GET";
+    public static final String POST = "POST";
+    public final List<String> allowedMethod;
 
     public Server() {
+        this.allowedMethod = List.of(GET, POST);
     }
 
     private void runServer() {
+
         try (ServerSocket serverSocket = buildServerSocket()) {
             while (!serverSocket.isClosed()) {
                 Connection connection = new Connection(serverSocket, this);
@@ -59,19 +65,25 @@ public class Server {
     }
 
     public synchronized Handler getHandler(Request request) {
+
         Path path = request.getPath();
         if (isValidPath(path)) {
             return handlers.get("HANDLER").get("NOTFOUND");
         }
         String stringPath = path.toString();
-        String requestMethod = request.getMethod();
-        Map<String, Handler> methodHandlers = handlers.get(requestMethod);
+        Map<String, Handler> methodHandlers = handlers.get(request.getMethod());
         Handler handler;
         if (methodHandlers != null && methodHandlers.containsKey(stringPath)) {
             handler = methodHandlers.get(stringPath);
         } else {
             handler = handlers.get("HANDLER").get("DEFAULT");
         }
+        System.out.println(request);
         return handler;
     }
+
+    public synchronized List<String> getAllowedMethod() {
+        return allowedMethod;
+    }
+
 }

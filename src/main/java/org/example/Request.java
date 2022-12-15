@@ -1,86 +1,58 @@
 package org.example;
 
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.net.URIBuilder;
+
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class Request {
+    private final List<String> headers;
     String publicDir = "./public";
     private final String method;
     private final Path path;
     private final String fileName;
+    private final URIBuilder builder;
     private final String body;
-    private final Map<String, String> queryParams;
+    private final List<NameValuePair> queryParams;
 
-    public Request(String requestLine) throws IOException {
-        String[] request = requestLine.split(" ");
-        checkCorrectnessRequest(request);
-        this.method = request[0];
-        this.path = parsePath(request[1]);
+
+    public Request(String method, String fullPath, List<String> headers, String body) throws URISyntaxException {
+        this.method = method;
+        this.builder = new URIBuilder(fullPath);
+        this.path = Path.of(publicDir + builder.getPath());
         this.fileName = path.getFileName().toString();
-        String queryString = parseQueryString(request[1]);
-        this.queryParams = parseParams(queryString);
-        this.body = request[2];
+        this.queryParams = builder.getQueryParams();
+        this.headers = headers;
+        this.body = body;
     }
 
-    private Path parsePath(String urlFromQuery)  {
-        if (urlFromQuery.contains("?")) {
-            String[] urlWhitQuery = urlFromQuery.split("\\?");
-            urlFromQuery = urlWhitQuery[0];
+
+    public List<NameValuePair> getQueryParams() {
+        return queryParams;
+    }
+
+    public NameValuePair getQueryParam(String name) {
+        if (queryParams.isEmpty()) {
+            System.err.print("[Запрошен QueryParam = " + name + "] QueryParam пуст \r\n");
+            return null;
         }
-        return Paths.get(publicDir + urlFromQuery);
-    }
-
-    private Map<String, String> parseParams(String queryString) {
-        final Map<String, String> queryParams = new LinkedHashMap<>();
-        String[] paramsArr;
-        if (queryString.contains("&")) {
-            paramsArr = queryString.split("&");
+        NameValuePair nameValuePair = builder.getFirstQueryParam(name);
+        System.out.println();
+        if (nameValuePair != null) {
+            System.out.print("[Запрошен QueryParam = " + name + "] Param value = " + nameValuePair.getValue() + "\r\n");
         } else {
-            paramsArr = new String[1];
-            paramsArr[0] = queryString;
+            System.err.print("[Запрошен QueryParam = " + name + "] QueryParam не найден \r\n");
         }
-        for (String pair : paramsArr) {
-            String param, value;
-            if (pair.contains("=")) {
-                final int separatorPosition = pair.indexOf("=");
-                final int pairLength = pair.length();
-                param = pair.substring(0, separatorPosition);
-                if ((separatorPosition + 1) == pairLength) {
-                    value = "";
-                } else {
-                    value = pair.substring(separatorPosition + 1, pairLength);
-                }
-            } else {
-                param = pair;
-                value = "";
-            }
-            queryParams.put(param, value);
-        }
-        return queryParams;
-    }
-
-    private String parseQueryString(String urlFromQuery) {
-        String queryString = "null";
-        if (urlFromQuery.contains("?")) {
-            String[] urlWhitQuery = urlFromQuery.split("\\?");
-            queryString = urlWhitQuery[1];
-        }
-        return queryString;
-    }
-
-    public Map<String, String> getQueryParams() {
-        return queryParams;
+        return nameValuePair;
     }
 
     public Path getPath() {
         return path;
     }
 
-    public String getFileName() {
-        return fileName;
-    }
 
     public String getMethod() {
         return method;
@@ -91,19 +63,14 @@ public class Request {
         return body;
     }
 
-    private void checkCorrectnessRequest(String[] requestParts) {
-        if (requestParts.length != 3) {
-            throw new RuntimeException("Объект Request не корректный");
-        }
-    }
-
     @Override
     public String toString() {
-        return "Request{" +
+        return "[Request{" +
                 "method='" + method + '\'' +
                 ", path='" + path.toString() + '\'' +
-                ", body='" + body + '\'' +
-                ", queryParams=" + queryParams +
-                '}';
+                ", \n headers='" + headers + '\'' +
+                ", \n body='" + body + '\'' +
+                ", queryParams=" + getQueryParams() +
+                "}]";
     }
 }
